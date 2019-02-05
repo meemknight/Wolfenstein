@@ -30,6 +30,10 @@ inline void llog(F f, T ...args)
 {
 
 }
+
+inline void llog()
+{
+}
 #endif
 
 inline void pause();

@@ -1,11 +1,13 @@
 #include <iostream>
-#include <glm/glm.hpp>
+#include <chrono>
+#define FORCE_LOG
 #include "tools.h"
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
 #include "Color.h"
 #include "RenderWindow.h"
 #include "Mat.h"
+#include "MathFunctions.h"
 
 int MAIN
 {
@@ -14,7 +16,7 @@ int MAIN
 
 	float playerX = 8;
 	float playerY = 8;
-	float playerA = 3.14159 / 4;
+	float playerA = (3.14159 / 4) * 7;
 
 	float fov = 3.14159 / 4;
 	float viewDepth = 16.f;
@@ -26,6 +28,8 @@ int MAIN
 	map.p = 
 "\
 ################\
+##.............#\
+#.#............#\
 #..............#\
 #..............#\
 #..............#\
@@ -36,40 +40,113 @@ int MAIN
 #..............#\
 #..............#\
 #..............#\
-#..............#\
-#..............#\
-#..............#\
-#..............#\
+#.#....#.......#\
+##.............#\
 ################\
 ";
 
 
 	RenderWindow window(screenWidth, screenHeight, "Hello World");
 
-
+	auto tp1 = std::chrono::system_clock::now();
+	auto tp2 = std::chrono::system_clock::now();
+	float accumulate = 0;
+	float framesCount = 0;
 
 	while (!window.shouldClose())
 	{
+		tp2 = std::chrono::system_clock::now();
+		std::chrono::duration<float> duration = tp2 - tp1;
+		tp1 = std::chrono::system_clock::now();
+		float deltaTime = duration.count();
+		accumulate += deltaTime;
+		framesCount++;
+		if (accumulate >= 1)
+		{
+			char c[20] = { 0 };
+			sprintf_s(c, "%f", framesCount);
+			glfwSetWindowTitle(window.window, c);
+			accumulate = accumulate-1;
+			framesCount = 0;
+		}
+
+
 		glfwPollEvents();
 
 		for(int x=0; x<screenWidth; x++)
 		{
 			float rayAngle = (playerA - (fov / 2.f)) + ((float)x / screenWidth)*fov;
 
+#pragma region temp
 			//temp
 			bool hitWall = 0;
 			distances[x] = 0;
-			while(!hitWall)
+			while (!hitWall)
 			{
-				distances[x]+= 0.1;
-				if(map.at((int)(sinf(rayAngle) * distances[x] + playerX), (int)(cosf(rayAngle) * distances[x] + playerY)) == '#')
+				distances[x] += 0.1;
+				if (map.at((int)(sinf(rayAngle) * distances[x] + playerX), (int)(cosf(rayAngle) * distances[x] + playerY)) == '#')
 				{
 					hitWall = 1;
 				}
 
 				if (distances[x] >= viewDepth) { break; }
 			}
+			//temp
+#pragma endregion
 
+#pragma region detSpace
+			int minx;
+			int miny;
+			int maxx;
+			int maxy;
+			int quadrant = getQuadrant(rayAngle);
+			if (quadrant == 1)
+			{
+				minx = (int)playerX + 1;
+				maxx = map.width();
+				miny = (int)playerY - 1;
+				maxy = 0;
+			}
+			else if (quadrant == 2)
+			{
+				minx = (int)playerX + 1;
+				maxx = map.width();
+				miny = (int)playerY + 1;
+				maxy = 16;
+			}
+			else if (quadrant == 3)
+			{
+				minx = (int)playerX - 1;
+				maxx = 0;
+				miny = (int)playerY + 1;
+				maxy = 16;
+			}
+			else
+			{
+				minx = (int)playerX - 1;
+				maxx = 0;
+				miny = (int)playerY - 1;
+				maxy = 0;
+			}
+
+#pragma endregion
+
+			float distx = fov + 1;
+			for (int linex = minx; linex < maxx; linex++) 
+			{
+				//auto intersectPos = intersect(rayAngle, playerX, playerY, )
+
+			}
+			
+			float disty = fov ;
+			for (int liney = miny; liney < maxy; liney++)
+			{
+				auto intersectPos = intersect(rayAngle, playerX, playerY, 0, liney);
+				float distance = getDistance(intersectPos.first, intersectPos.second, playerX, playerY);
+				if (distance < disty) { disty = distance; }
+			}
+
+			distances[x] = disty;
 		}
 		
 		for(int x=0; x<screenWidth; x++)
