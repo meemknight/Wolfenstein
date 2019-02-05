@@ -15,6 +15,7 @@ public:
 	RenderWindow(int x, int y, const char*);
 
 	void drawPixel(int x, int y, Color c);
+	void clear(Color c);
 
 	void render();
 

@@ -5,14 +5,46 @@
 #include <GLFW/glfw3.h>
 #include "Color.h"
 #include "RenderWindow.h"
+#include "Mat.h"
 
 int MAIN
 {
+	const int screenWidth = 360;
+	const int screenHeight = 228;
+
+	float playerX = 8;
+	float playerY = 8;
+	float playerA = 3.14159 / 4;
+
+	float fov = 3.14159 / 4;
+	float viewDepth = 16.f;
+
+	float distances[screenWidth];
 
 
-	RenderWindow window(640, 480, "Hello World");
+	Mat<const char, 16, 16> map;
+	map.p = 
+"\
+################\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+#..............#\
+################\
+";
 
-	
+
+	RenderWindow window(screenWidth, screenHeight, "Hello World");
 
 
 
@@ -20,18 +52,51 @@ int MAIN
 	{
 		glfwPollEvents();
 
-		for(int x=10; x<100; x++)
+		for(int x=0; x<screenWidth; x++)
 		{
-			for(int y=10; y<100; y++)
+			float rayAngle = (playerA - (fov / 2.f)) + ((float)x / screenWidth)*fov;
+
+			//temp
+			bool hitWall = 0;
+			distances[x] = 0;
+			while(!hitWall)
 			{
-				window.drawPixel(x, y, Color::red());
+				distances[x]+= 0.1;
+				if(map.at((int)(sinf(rayAngle) * distances[x] + playerX), (int)(cosf(rayAngle) * distances[x] + playerY)) == '#')
+				{
+					hitWall = 1;
+				}
+
+				if (distances[x] >= viewDepth) { break; }
+			}
+
+		}
+		
+		for(int x=0; x<screenWidth; x++)
+		{
+			int ceeling = (screenHeight / 2.f) - (screenHeight / distances[x]);
+			int floor = screenHeight - ceeling;
+			
+			for(int y=0; y<screenHeight; y++)
+			{
+				if(y<ceeling)
+				{
+					window.drawPixel(x, y, Color(10, 10, 10));
+				}else
+				if(y<floor)
+				{
+					window.drawPixel(x, y, Color(100, 100, 100));
+				}else
+				{
+					window.drawPixel(x, y, Color(10, 10, 10));
+				}
 			}
 		
 		}
 
 
 		window.render();
-		glClear(GL_COLOR_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	glfwTerminate();

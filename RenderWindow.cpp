@@ -4,15 +4,15 @@
 const GLchar* vertexShaderSource =
 "                                                   \
 #version 330                                        \n\
-                                                    \
+													\
 layout (location = 0) in vec4 inVertexPosition;     \
 layout (location = 1) in vec4 inColor;			    \
-        out vec4 c; 								\
+		out vec4 c; 								\
 													\
-                                                    \
+													\
 void main()                                         \
 {                                                   \
-    gl_Position =  vec4(inVertexPosition.xy, 1.0, 1.0);	\
+	gl_Position =  vec4(inVertexPosition.xy, 1.0, 1.0);	\
 	c = inColor;									\
 }                                                   \
 ";
@@ -24,7 +24,7 @@ in vec4 c;                                          \
 out vec4 color;                                     \
 void main()                                         \
 {                                                   \
-    color = vec4(c.rgb, 1);	                        \
+	color = vec4(c.rgb, 1);	                        \
 }                                                   \
 ";
 
@@ -60,10 +60,10 @@ RenderWindow::RenderWindow(int x, int y, const char* t):sizex(x), sizey(y)
 			Vector v[2];
 			v[0].x = ((((float)sx / x) * 2) -1)*1;
 			v[0].y = ((((float)sy / y) * 2) -1)*-1;
-			v[1].x = 1;
-			v[1].y = 0.5f;
-			v[1].z = 1;
-			v[1].w = 1;
+			v[1].x = 0;
+			v[1].y = 0;
+			v[1].z = 0;
+			v[1].w = 0;
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (sx + (sy*sizex)), sizeof(Vector) * 2, v);
 		}
 
@@ -132,12 +132,23 @@ RenderWindow::RenderWindow(int x, int y, const char* t):sizex(x), sizey(y)
 void RenderWindow::drawPixel(int x, int y, Color c)
 {
 	Vector v;
-	v.x = c.r / UCHAR_MAX;
-	v.y = c.g / UCHAR_MAX;
-	v.z = c.b / UCHAR_MAX;
+	v.x = (float)c.r / UCHAR_MAX;
+	v.y = (float)c.g / UCHAR_MAX;
+	v.z = (float)c.b / UCHAR_MAX;
 
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (x + (y*sizex)) + sizeof(float) * 4, sizeof(Vector), &v);
+}
+
+void RenderWindow::clear(Color c)
+{
+	for(int y=0; y<sizey; y++)
+	{
+		for (int x = 0; x < sizex; x++)
+		{
+			drawPixel(x, y, c);
+		}
+	}
 }
 
 void RenderWindow::render()
