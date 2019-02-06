@@ -8,6 +8,7 @@ class RenderWindow
 {
 	unsigned int buffer;
 	int shaderID;
+	Vector *cpuBuffer;
 public:
 	GLFWwindow* window;
 	const int sizex;
@@ -20,6 +21,6 @@ public:
 	void render();
 
 	bool shouldClose() { return glfwWindowShouldClose(window); }
-
+	void cleanup();
 };
 

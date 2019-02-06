@@ -146,7 +146,7 @@ int MAIN
 				if (distance < disty) { disty = distance; }
 			}
 
-			distances[x] = disty;
+			//distances[x] = disty;
 		}
 		
 		for(int x=0; x<screenWidth; x++)
@@ -170,8 +170,7 @@ int MAIN
 			}
 		
 		}
-
-
+		
 		window.render();
 		//glClear(GL_COLOR_BUFFER_BIT);
 	}

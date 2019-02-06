@@ -46,10 +46,13 @@ RenderWindow::RenderWindow(int x, int y, const char* t):sizex(x), sizey(y)
 	if (glewInit() != GLEW_OK)
 	{std::exit(2); }
 
+	cpuBuffer = new Vector[x * y * 2];
+
+
+
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, (sizeof(Vector) * 8) * x * y, 0, GL_DYNAMIC_DRAW);
-	
+	int pos = 0;
 	for (int sy = 0; sy < y; sy++)
 	{
 		for (int sx = 0; sx < x; sx++)
@@ -64,10 +67,13 @@ RenderWindow::RenderWindow(int x, int y, const char* t):sizex(x), sizey(y)
 			v[1].y = 0;
 			v[1].z = 0;
 			v[1].w = 0;
-			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (sx + (sy*sizex)), sizeof(Vector) * 2, v);
+			//glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (sx + (sy*sizex)), sizeof(Vector) * 2, v);
+			memcpy(&cpuBuffer[pos], v, sizeof(v));
+			pos += 2;
 		}
 
 	}
+	glBufferData(GL_ARRAY_BUFFER, (sizeof(Vector) * 2) * x * y, cpuBuffer, GL_DYNAMIC_DRAW);
 
 
 	shaderID = glCreateProgram();
@@ -136,8 +142,9 @@ void RenderWindow::drawPixel(int x, int y, Color c)
 	v.y = (float)c.g / UCHAR_MAX;
 	v.z = (float)c.b / UCHAR_MAX;
 
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (x + (y*sizex)) + sizeof(float) * 4, sizeof(Vector), &v);
+	//glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (x + (y*sizex)) + sizeof(float) * 4, sizeof(Vector), &v);
+	cpuBuffer[((x + (y*sizex))*2) + 1] = v;
 }
 
 void RenderWindow::clear(Color c)
@@ -156,6 +163,7 @@ void RenderWindow::render()
 	glUseProgram(shaderID);
 
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector) * 2 * sizex * sizey, cpuBuffer);
 
 	glVertexAttribPointer(0, 4, GL_FLOAT ,0 , 0, 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT ,0 , 0, (const void*)(sizeof(float) * 4));
@@ -166,4 +174,8 @@ void RenderWindow::render()
 	glDrawArrays(GL_POINTS, 0, sizex * sizey * 2);
 
 	glfwSwapBuffers(window);
+}
+
+void RenderWindow::cleanup()
+{
 }
