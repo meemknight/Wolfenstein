@@ -1,4 +1,6 @@
 #pragma once
+
+__declspec(align(16))
 class Vector
 {
 public:

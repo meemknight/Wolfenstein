@@ -11,8 +11,8 @@
 
 int MAIN
 {
-	const int screenWidth = 360;
-	const int screenHeight = 228;
+	const int screenWidth = 420;
+	const int screenHeight = 308;
 
 	float playerX = 8;
 	float playerY = 8;
@@ -69,6 +69,47 @@ int MAIN
 			accumulate = accumulate-1;
 			framesCount = 0;
 		}
+
+#pragma region kyes
+		float sina = sinf(playerA);
+		float cosa = cosf(playerA);
+
+		if (GetAsyncKeyState((unsigned short)'Q') & 0x8000)
+		{
+			playerA -= 1.4 * deltaTime;
+		}
+
+		if (GetAsyncKeyState((unsigned short)'E') & 0x8000)
+		{
+			playerA += 1.4 * deltaTime;
+		}
+
+		if(GetAsyncKeyState((unsigned short)'W') & 0x8000)
+		{
+			playerX += sina * deltaTime * 10.f;
+			playerY += cosa * deltaTime * 10.f;
+
+			if(map.at(playerX, playerY) == '#')
+			{
+				playerX -= sina * deltaTime * 10.f;
+				playerY -= cosa * deltaTime * 10.f;
+			}
+		}
+
+		if (GetAsyncKeyState((unsigned short)'S') & 0x8000)
+		{
+			playerX -= sina * deltaTime * 10.f;
+			playerY -= cosa * deltaTime * 10.f;
+
+			if (map.at(playerX, playerY) == '#')
+			{
+				playerX += sina * deltaTime * 10.f;
+				playerY += cosa * deltaTime * 10.f;
+			}
+		}
+
+#pragma endregion
+
 
 
 		glfwPollEvents();
@@ -165,16 +206,18 @@ int MAIN
 					window.drawPixel(x, y, Color(100, 100, 100));
 				}else
 				{
-					window.drawPixel(x, y, Color(10, 10, 10));
+					window.drawPixel(x, y, Color(50, 10, 10));
 				}
 			}
 		
 		}
 		
 		window.render();
+		//window.clear(Color(200,0,0));
 		//glClear(GL_COLOR_BUFFER_BIT);
 	}
 
+	window.cleanup();
 	glfwTerminate();
 	return 0;
 }

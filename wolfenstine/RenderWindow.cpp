@@ -63,6 +63,8 @@ RenderWindow::RenderWindow(int x, int y, const char* t):sizex(x), sizey(y)
 			Vector v[2];
 			v[0].x = ((((float)sx / x) * 2) -1)*1;
 			v[0].y = ((((float)sy / y) * 2) -1)*-1;
+			v[0].z = 0;
+			v[0].w = 0;
 			v[1].x = 0;
 			v[1].y = 0;
 			v[1].z = 0;
@@ -141,6 +143,7 @@ void RenderWindow::drawPixel(int x, int y, Color c)
 	v.x = (float)c.r / UCHAR_MAX;
 	v.y = (float)c.g / UCHAR_MAX;
 	v.z = (float)c.b / UCHAR_MAX;
+	//v.w = 0;
 
 	//glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8 * (x + (y*sizex)) + sizeof(float) * 4, sizeof(Vector), &v);
@@ -166,7 +169,7 @@ void RenderWindow::render()
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vector) * 2 * sizex * sizey, cpuBuffer);
 
 	glVertexAttribPointer(0, 4, GL_FLOAT ,0 , 0, 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT ,0 , 0, (const void*)(sizeof(float) * 4));
+	glVertexAttribPointer(1, 4, GL_FLOAT ,0 , 0, (const void*)(sizeof(Vector)));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -178,4 +181,5 @@ void RenderWindow::render()
 
 void RenderWindow::cleanup()
 {
+	delete[] cpuBuffer;
 }
